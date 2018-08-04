@@ -1,0 +1,70 @@
+<script src="./tinytest.js"></script>
+<script>
+
+// var newArray = arr.filter(callbackFunction(element, *index, *array), *thisArg) *are opitional
+
+function filter(originalArray, callback, thisArgument){
+  var bindCallback = callback;
+  if (thisArgument != undefined){
+    bindCallback = callback.bind(thisArgument);
+  }
+  var filteredArray = [];
+  for (var i = 0; i < originalArray.length; i++){
+    if (bindCallback(originalArray[i], i, originalArray)){
+      filteredArray.push(originalArray[i]);
+    };
+  }
+  return filteredArray;
+};
+
+tests({
+
+  'It should run the callback function array.length times.': function() {
+    var counter = 0;
+    filter([1,2,3], function(){
+      counter++
+    });
+    eq(counter, 3);
+  },
+  'It should pass each element as the first argument to the callback.': function() {
+    filter([1], function(number){
+      eq(number, 1);
+    });
+  },
+  'It should pass in the ith element as the second argument to the callback.' : function(){
+    filter([1], function(number, index){
+      eq(index, 0);
+    });
+  },
+  'it should pass in the original array as the third argument to the callback.' : function(){
+    var myArray = [1];
+    filter(myArray, function(number, index, originalArray){
+      eq(originalArray, myArray);
+  });
+},
+  'It should accept a configurable this object.' : function(){
+    // filter(/* Array*/, /* callback */, /* configurableThisObject */)
+    filter([1], function() {
+      // this.description should be equal to 'configurable this object'
+      eq(this.description, 'I am a configurable this object');
+    }, {description : 'I am a configurable this object'});
+},
+   'It should return an Array.' : function(){
+     var testArray = filter([], function(){});
+     eq(Array.isArray(testArray), true);
+},
+  'it should return a new array, not the array being filtered.' : function(){
+    //
+    var originalArray = [];
+    var arrayBeingFiltered = filter(originalArray, function(){});
+    eq(arrayBeingFiltered !== originalArray, true);
+},
+  'it should return a new array that only has elements where callback() is true.' : function(){
+    var filteredArray = filter([1, 2], function(number){
+      return number > 1;
+    });
+    eq(filteredArray.length, 1)
+    eq(filteredArray[0], 2)
+  }
+});
+</script>
